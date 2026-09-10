@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     max_attachments: int = Field(default=5, validation_alias="MAX_ATTACHMENTS")
     rate_limit_per_minute: int = Field(default=10, validation_alias="RATE_LIMIT_PER_MINUTE")
     rate_limit_window_seconds: int = Field(default=60, validation_alias="RATE_LIMIT_WINDOW_SECONDS")
-    jwt_expiry_minutes: int = Field(default=8 * 60, validation_alias="JWT_EXPIRY_MINUTES")
+    jwt_expiry_minutes: int = Field(default=5 * 60, validation_alias="JWT_EXPIRY_MINUTES")
     max_announcement_chars: int = Field(default=20_000, validation_alias="MAX_ANNOUNCEMENT_CHARS")
     allowed_upload_extensions: str = Field(
         default=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx",
