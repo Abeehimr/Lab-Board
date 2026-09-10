@@ -35,6 +35,9 @@ class EventBroker:
     def unsubscribe(self, queue: asyncio.Queue[Event]) -> None:
         self._subscribers.discard(queue)
 
+    def is_subscribed(self, queue: asyncio.Queue[Event]) -> bool:
+        return queue in self._subscribers
+
     async def publish(self, event: str, data: dict[str, object] | None = None) -> Event:
         self._next_id += 1
         item = Event(self._next_id, event, data or {})
@@ -67,6 +70,8 @@ async def stream_events(request, broker: EventBroker, last_event_id: str | None)
             {"reason": "reconnect" if parsed_last_id else "initial"},
         ).encode()
         while True:
+            if not broker.is_subscribed(queue):
+                break
             if await request.is_disconnected():
                 break
             try:
