@@ -9,6 +9,7 @@ from .security import (
     RateLimiter,
     create_token,
     hash_password,
+    require_admin,
     require_csrf,
     request_ip,
     verify_password,
@@ -59,3 +60,8 @@ async def logout(
     response.delete_cookie(settings.cookie_name, path="/")
     response.delete_cookie("labboard_csrf", path="/")
     return MessageResponse(message="Logged out")
+
+
+@router.get("/status", response_model=MessageResponse)
+async def auth_status(_: dict[str, object] = Depends(require_admin)) -> MessageResponse:
+    return MessageResponse(message="authenticated")

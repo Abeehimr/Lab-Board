@@ -1,0 +1,127 @@
+const feed = document.querySelector("#feed");
+const composer = document.querySelector("#composer");
+const loginOpen = document.querySelector("#login-open");
+const loginDialog = document.querySelector("#login-dialog");
+const logoutButton = document.querySelector("#logout");
+const connectionStatus = document.querySelector("#connection-status");
+
+function csrfToken() {
+  return document.cookie.split("; ").find((item) => item.startsWith("labboard_csrf="))?.split("=")[1] || "";
+}
+
+async function request(url, options = {}) {
+  const response = await fetch(url, { ...options, headers: { ...(options.headers || {}) } });
+  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail || "Request failed");
+  return response;
+}
+
+function render(items) {
+  feed.replaceChildren();
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No announcements yet.";
+    feed.append(empty);
+    return;
+  }
+  for (const item of items) {
+    const card = document.createElement("article");
+    card.className = "announcement";
+    const header = document.createElement("div");
+    header.className = "announcement-header";
+    const date = document.createElement("time");
+    date.className = "date";
+    date.dateTime = item.created_at;
+    date.textContent = new Date(item.created_at).toLocaleString();
+    header.append(date);
+    if (!composer.classList.contains("hidden")) {
+      const remove = document.createElement("button");
+      remove.className = "button danger";
+      remove.textContent = "Delete";
+      remove.onclick = () => deleteAnnouncement(item.id);
+      header.append(remove);
+    }
+    const body = document.createElement("p");
+    body.className = "announcement-body";
+    body.textContent = item.body;
+    card.append(header, body);
+    if (item.attachments.length) {
+      const attachments = document.createElement("div");
+      attachments.className = "attachments";
+      for (const attachment of item.attachments) {
+        const link = document.createElement("a");
+        link.className = "attachment";
+        link.href = attachment.url;
+        link.textContent = `${attachment.original_name} (${Math.ceil(attachment.size / 1024)} KB)`;
+        attachments.append(link);
+      }
+      card.append(attachments);
+    }
+    feed.append(card);
+  }
+}
+
+async function loadAnnouncements() {
+  try {
+    const response = await request("/api/announcements");
+    render(await response.json());
+  } catch (_) {
+    feed.textContent = "Unable to load announcements.";
+  }
+}
+
+async function refreshAuth() {
+  try {
+    await request("/api/auth/status");
+    composer.classList.remove("hidden");
+    loginOpen.classList.add("hidden");
+    logoutButton.classList.remove("hidden");
+  } catch (_) {
+    composer.classList.add("hidden");
+    loginOpen.classList.remove("hidden");
+    logoutButton.classList.add("hidden");
+  }
+  await loadAnnouncements();
+}
+
+async function deleteAnnouncement(id) {
+  if (!confirm("Delete this announcement?")) return;
+  await request(`/api/announcements/${id}`, { method: "DELETE", headers: { "X-CSRF-Token": csrfToken() } });
+  await loadAnnouncements();
+}
+
+loginOpen.onclick = () => loginDialog.showModal();
+document.querySelector("#login-close").onclick = () => loginDialog.close();
+document.querySelector("#login-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const error = document.querySelector("#login-error");
+  error.textContent = "";
+  try {
+    await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: document.querySelector("#password").value }) });
+    loginDialog.close();
+    event.target.reset();
+    await refreshAuth();
+  } catch (_) { error.textContent = "Unable to sign in."; }
+};
+logoutButton.onclick = async () => {
+  await request("/api/auth/logout", { method: "POST", headers: { "X-CSRF-Token": csrfToken() } });
+  await refreshAuth();
+};
+document.querySelector("#publish-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const error = document.querySelector("#publish-error");
+  error.textContent = "";
+  try {
+    const form = new FormData(event.target);
+    await request("/api/announcements", { method: "POST", headers: { "X-CSRF-Token": csrfToken() }, body: form });
+    event.target.reset();
+    await loadAnnouncements();
+  } catch (exception) { error.textContent = exception.message; }
+};
+
+const events = new EventSource("/events");
+events.onopen = () => { connectionStatus.textContent = "Live updates on"; };
+events.onerror = () => { connectionStatus.textContent = "Reconnecting…"; };
+events.addEventListener("announcement", loadAnnouncements);
+events.addEventListener("refetch", loadAnnouncements);
+refreshAuth();

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config import Settings, get_settings
@@ -69,6 +71,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.get("/health", response_model=HealthResponse, tags=["health"])
     async def health() -> HealthResponse:
         return HealthResponse(status="ok")
+
+    frontend_dir = Path(__file__).resolve().parents[2] / "frontend"
+    application.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
     return application
 

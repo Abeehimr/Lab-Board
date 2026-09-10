@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LabBoard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">LabBoard</a>
+    <div class="top-actions">
+      <span id="connection-status" class="status">Connecting…</span>
+      <button id="login-open" class="button secondary">Admin login</button>
+      <button id="logout" class="button secondary hidden">Log out</button>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">Announcements</p>
+      <h1>Stay up to date.</h1>
+      <p class="muted">The latest updates from your lab, class, or team.</p>
+    </section>
+    <section id="composer" class="card hidden">
+      <h2>Publish an announcement</h2>
+      <form id="publish-form">
+        <label for="body">Message</label>
+        <textarea id="body" name="body" rows="5" maxlength="20000" required></textarea>
+        <label for="files">Attachments</label>
+        <input id="files" name="files" type="file" multiple>
+        <div class="form-row">
+          <button class="button primary" type="submit">Publish</button>
+          <span id="publish-error" class="error"></span>
+        </div>
+      </form>
+    </section>
+    <section id="feed" class="feed" aria-live="polite"></section>
+  </main>
+  <dialog id="login-dialog">
+    <form id="login-form" method="dialog" class="login-form">
+      <button id="login-close" class="dialog-close" type="button" aria-label="Close">×</button>
+      <h2>Admin login</h2>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="button primary" type="submit">Sign in</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>
