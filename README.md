@@ -11,14 +11,15 @@ Python 3.14 and [uv](https://docs.astral.sh/uv/) are recommended:
 
 ```bash
 cp .env.example .env
-# Replace JWT_SECRET and ADMIN_PASSWORD with real values.
+# Replace ADMIN_PASSWORD with a real value.
 uv sync --dev
 uv run uvicorn labboard.app:app --reload
 ```
 
-Open <http://127.0.0.1:8000>. The first startup creates the SQLite schema and upload
-directory. `JWT_SECRET` must be at least 32 characters and `ADMIN_PASSWORD` at least
-12 characters; the application fails fast otherwise.
+Open <http://127.0.0.1:8000>. The first startup creates the SQLite schema, upload directory,
+and a random JWT signing secret at `./data/.jwt_secret`. The secret is reused across
+restarts and is excluded from version control. `ADMIN_PASSWORD` must be at least 12
+characters; the application fails fast otherwise.
 
 ## Docker deployment
 
@@ -26,7 +27,6 @@ The production-shaped deployment serves the static frontend through nginx and pr
 `/api/` and `/events` to one backend process:
 
 ```bash
-export JWT_SECRET="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 export ADMIN_PASSWORD='use-a-long-password-here'
 docker compose up --build -d
 ```
@@ -48,8 +48,10 @@ when TLS is terminated at a trusted reverse proxy; local HTTP development uses `
 * Uploads are kept outside the static frontend and are never served by path. ORM
   statements are parameterized SQLAlchemy queries.
 
-For internet-facing use, put the nginx frontend behind HTTPS, use a strong secret and
-password from a secret manager, restrict the host with a firewall, and monitor logs.
+For internet-facing use, put the nginx frontend behind HTTPS, use a strong password
+from a secret manager, restrict the host with a firewall, and monitor logs. Protect the
+database volume because it contains the generated JWT signing secret; deleting it
+logs out all sessions and generates a new signing key.
 The in-memory limiter is per process and is intentionally simple; use a shared gateway
 or Redis before running multiple instances.
 

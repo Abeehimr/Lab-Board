@@ -5,6 +5,21 @@ from labboard.app import create_app
 from labboard.config import Settings
 
 
+def test_jwt_secret_is_generated_and_persisted(tmp_path):
+    secret_file = tmp_path / "secrets" / "jwt"
+    settings = Settings(
+        jwt_secret="",
+        admin_password="a" * 12,
+        jwt_secret_file=secret_file,
+    )
+
+    generated = settings.resolve_jwt_secret()
+
+    assert len(generated) >= 32
+    assert secret_file.read_text(encoding="ascii").strip() == generated
+    assert Settings(jwt_secret="", admin_password="a" * 12, jwt_secret_file=secret_file).resolve_jwt_secret() == generated
+
+
 @pytest.mark.asyncio
 async def test_health(tmp_path):
     settings = Settings(

@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to a random 32+ character value}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD to a 12+ character value}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       DATABASE_URL: sqlite+aiosqlite:////app/data/labboard.db
