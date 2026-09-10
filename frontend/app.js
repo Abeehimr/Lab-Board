@@ -9,6 +9,28 @@ function csrfToken() {
   return document.cookie.split("; ").find((item) => item.startsWith("labboard_csrf="))?.split("=")[1] || "";
 }
 
+function renderBody(body) {
+  const fragment = document.createDocumentFragment();
+  const urlPattern = /https?:\/\/[^\s<]+/gi;
+  let cursor = 0;
+  for (const match of body.matchAll(urlPattern)) {
+    const url = match[0];
+    const start = match.index ?? 0;
+    const trailing = url.match(/[),.!?:;]+$/)?.[0] || "";
+    const linkUrl = trailing ? url.slice(0, -trailing.length) : url;
+    fragment.append(document.createTextNode(body.slice(cursor, start)));
+    const link = document.createElement("a");
+    link.href = linkUrl;
+    link.textContent = linkUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    fragment.append(link, document.createTextNode(trailing));
+    cursor = start + url.length;
+  }
+  fragment.append(document.createTextNode(body.slice(cursor)));
+  return fragment;
+}
+
 async function request(url, options = {}) {
   const response = await fetch(url, { ...options, headers: { ...(options.headers || {}) } });
   if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail || "Request failed");
@@ -43,7 +65,7 @@ function render(items) {
     }
     const body = document.createElement("p");
     body.className = "announcement-body";
-    body.textContent = item.body;
+    body.append(renderBody(item.body));
     card.append(header, body);
     if (item.attachments.length) {
       const attachments = document.createElement("div");
@@ -112,7 +134,11 @@ document.querySelector("#publish-form").onsubmit = async (event) => {
   const error = document.querySelector("#publish-error");
   error.textContent = "";
   try {
-    const form = new FormData(event.target);
+    const form = new FormData();
+    form.append("body", event.target.elements.body.value);
+    for (const file of event.target.elements.files.files) {
+      form.append("files", file);
+    }
     await request("/api/announcements", { method: "POST", headers: { "X-CSRF-Token": csrfToken() }, body: form });
     event.target.reset();
     await loadAnnouncements();

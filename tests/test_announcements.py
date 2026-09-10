@@ -21,12 +21,23 @@ async def test_publish_list_download_delete(tmp_path):
             response = await client.post(
                 "/api/announcements",
                 data={"body": "Welcome to LabBoard"},
-                files={"files": ("notes.txt", b"hello", "text/plain")},
                 headers={"X-CSRF-Token": csrf},
             )
             assert response.status_code == 201
             announcement = response.json()
-            assert announcement["attachments"][0]["original_name"] == "notes.txt"
+            assert announcement["attachments"] == []
+            response = await client.post(
+                "/api/announcements",
+                data={"body": "Files"},
+                files=[
+                    ("files", ("notes.txt", b"hello", "text/plain")),
+                    ("files", ("more.txt", b"world", "text/plain")),
+                ],
+                headers={"X-CSRF-Token": csrf},
+            )
+            assert response.status_code == 201
+            announcement = response.json()
+            assert [item["original_name"] for item in announcement["attachments"]] == ["notes.txt", "more.txt"]
             listing = await client.get("/api/announcements")
             assert listing.status_code == 200
             download = await client.get(announcement["attachments"][0]["url"])
@@ -34,6 +45,12 @@ async def test_publish_list_download_delete(tmp_path):
             assert download.content == b"hello"
             deleted = await client.delete(
                 f"/api/announcements/{announcement['id']}", headers={"X-CSRF-Token": csrf}
+            )
+            assert deleted.status_code == 200
+            remaining = (await client.get("/api/announcements")).json()
+            assert len(remaining) == 1
+            deleted = await client.delete(
+                f"/api/announcements/{remaining[0]['id']}", headers={"X-CSRF-Token": csrf}
             )
             assert deleted.status_code == 200
             assert (await client.get("/api/announcements")).json() == []

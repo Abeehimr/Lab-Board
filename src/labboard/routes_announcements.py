@@ -57,7 +57,7 @@ async def publish_announcement(
     body = body.strip()
     if not body or len(body) > settings.max_announcement_chars:
         raise HTTPException(status_code=400, detail="Invalid announcement")
-    uploads = files or []
+    uploads = [upload for upload in (files or []) if upload.filename]
     if len(uploads) > settings.max_attachments:
         raise HTTPException(status_code=400, detail="Too many attachments")
     announcement = Announcement(body=body)
