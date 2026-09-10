@@ -79,6 +79,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def admin_page() -> FileResponse:
         return FileResponse(frontend_dir / "index.html", media_type="text/html")
 
+    @application.get("/admin/login", include_in_schema=False)
+    @application.get("/admin/login/", include_in_schema=False)
+    async def admin_login_page() -> FileResponse:
+        return FileResponse(frontend_dir / "login.html", media_type="text/html")
+
     application.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
     return application

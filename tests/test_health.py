@@ -49,4 +49,9 @@ async def test_admin_page(tmp_path):
         async with AsyncClient(transport=ASGITransport(app=application), base_url="http://test") as client:
             response = await client.get("/admin")
     assert response.status_code == 200
-    assert "id=\"login-dialog\"" in response.text
+    assert "id=\"publish-form\"" in response.text
+    async with application.router.lifespan_context(application):
+        async with AsyncClient(transport=ASGITransport(app=application), base_url="http://test") as client:
+            response = await client.get("/admin/login")
+    assert response.status_code == 200
+    assert "id=\"login-form\"" in response.text

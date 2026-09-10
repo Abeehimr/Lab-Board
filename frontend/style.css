@@ -42,9 +42,9 @@ textarea:focus, input:focus { outline: 2px solid #aecbfa; border-color: var(--bl
 .empty { text-align: center; border: 1px dashed var(--line); padding: 35px; color: var(--muted); }
 dialog { border: 0; border-radius: 8px; padding: 0; width: min(380px, calc(100% - 40px)); box-shadow: 0 8px 30px #0002; }
 dialog::backdrop { background: #20212466; }
-.login-form { padding: 30px; position: relative; }
-.login-form .button { margin-top: 12px; }
-.dialog-close { position: absolute; right: 12px; top: 10px; border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--muted); }
+.login-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-card { width: min(420px, 100%); margin: 0; }
+.login-card h1 { margin-bottom: 8px; }
 .error { color: var(--danger); font-size: 13px; min-height: 18px; }
 .hidden { display: none !important; }
 @media (max-width: 600px) { .topbar { padding: 0 16px; } .top-actions { gap: 7px; } .status { display: none; } h1 { font-size: 32px; } }

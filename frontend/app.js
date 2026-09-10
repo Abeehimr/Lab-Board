@@ -1,7 +1,5 @@
 const feed = document.querySelector("#feed");
 const composer = document.querySelector("#composer");
-const loginOpen = document.querySelector("#login-open");
-const loginDialog = document.querySelector("#login-dialog");
 const logoutButton = document.querySelector("#logout");
 const connectionStatus = document.querySelector("#connection-status");
 const notificationsOpen = document.querySelector("#notifications-open");
@@ -134,23 +132,17 @@ async function handleAnnouncementEvent(event) {
 async function refreshAuth() {
   if (!adminPath) {
     composer.classList.add("hidden");
-    loginOpen.classList.add("hidden");
     logoutButton.classList.add("hidden");
     await loadAnnouncements();
     return;
   }
   pageTitle.textContent = "Admin panel";
-  loginOpen.classList.remove("hidden");
   try {
     await request("/api/auth/status");
     composer.classList.remove("hidden");
-    loginOpen.classList.add("hidden");
     logoutButton.classList.remove("hidden");
   } catch (_) {
-    composer.classList.add("hidden");
-    loginOpen.classList.remove("hidden");
-    logoutButton.classList.add("hidden");
-    if (!loginDialog.open) loginDialog.showModal();
+    window.location.replace("/admin/login");
   }
   await loadAnnouncements();
 }
@@ -161,19 +153,6 @@ async function deleteAnnouncement(id) {
   await loadAnnouncements();
 }
 
-loginOpen.onclick = () => loginDialog.showModal();
-document.querySelector("#login-close").onclick = () => loginDialog.close();
-document.querySelector("#login-form").onsubmit = async (event) => {
-  event.preventDefault();
-  const error = document.querySelector("#login-error");
-  error.textContent = "";
-  try {
-    await request("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: document.querySelector("#password").value }) });
-    loginDialog.close();
-    event.target.reset();
-    await refreshAuth();
-  } catch (_) { error.textContent = "Unable to sign in."; }
-};
 logoutButton.onclick = async () => {
   await request("/api/auth/logout", { method: "POST", headers: { "X-CSRF-Token": csrfToken() } });
   await refreshAuth();

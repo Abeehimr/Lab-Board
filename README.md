@@ -36,7 +36,8 @@ Both containers run as non-root users and include health checks. Keep `COOKIE_SE
 when TLS is terminated at a trusted reverse proxy; local HTTP development uses `false`.
 
 The public page does not expose an admin login control. Open
-<http://127.0.0.1:8080/admin> directly to sign in and open the admin publishing panel.
+<http://127.0.0.1:8080/admin/login> to use the separate administrator login page.
+Successful authentication redirects to <http://127.0.0.1:8080/admin>.
 The `Enable notifications` control uses the browser Notification API for live tabs. It
 does not provide notifications after the browser is closed; that requires a separate
 HTTPS Web Push/VAPID service.
