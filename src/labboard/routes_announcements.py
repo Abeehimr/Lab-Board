@@ -78,6 +78,7 @@ async def publish_announcement(
         await session.commit()
         await session.refresh(announcement)
         await session.refresh(announcement, attribute_names=["attachments"])
+        await request.app.state.event_broker.publish("announcement", {"action": "published", "id": announcement.id})
     except Exception:
         await session.rollback()
         for path in saved_paths:
@@ -101,6 +102,7 @@ async def delete_announcement(
     paths = [stored_path(request.app.state.settings, attachment.stored_name) for attachment in item.attachments]
     await session.delete(item)
     await session.commit()
+    await request.app.state.event_broker.publish("announcement", {"action": "deleted", "id": announcement_id})
     for path in paths:
         path.unlink(missing_ok=True)
     return MessageResponse(message="Announcement deleted")
