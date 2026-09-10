@@ -9,6 +9,14 @@ class HealthResponse(BaseModel):
     status: str
 
 
+class LoginRequest(BaseModel):
+    password: str = Field(min_length=1, max_length=512)
+
+
+class MessageResponse(BaseModel):
+    message: str
+
+
 class AttachmentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
