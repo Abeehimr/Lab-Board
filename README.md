@@ -37,6 +37,9 @@ when TLS is terminated at a trusted reverse proxy; local HTTP development uses `
 
 The public page does not expose an admin login control. Open
 <http://127.0.0.1:8080/admin> directly to sign in and open the admin publishing panel.
+The `Enable notifications` control uses the browser Notification API for live tabs. It
+does not provide notifications after the browser is closed; that requires a separate
+HTTPS Web Push/VAPID service.
 
 ## Security model
 

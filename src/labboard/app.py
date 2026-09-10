@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -74,6 +74,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return HealthResponse(status="ok")
 
     frontend_dir = Path(__file__).resolve().parents[2] / "frontend"
+    @application.get("/admin", include_in_schema=False)
+    @application.get("/admin/", include_in_schema=False)
+    async def admin_page() -> FileResponse:
+        return FileResponse(frontend_dir / "index.html", media_type="text/html")
+
     application.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
     return application

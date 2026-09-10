@@ -4,6 +4,7 @@ const loginOpen = document.querySelector("#login-open");
 const loginDialog = document.querySelector("#login-dialog");
 const logoutButton = document.querySelector("#logout");
 const connectionStatus = document.querySelector("#connection-status");
+const notificationsOpen = document.querySelector("#notifications-open");
 const pageTitle = document.querySelector("#page-title");
 const adminPath = window.location.pathname === "/admin" || window.location.pathname === "/admin/";
 
@@ -94,6 +95,42 @@ async function loadAnnouncements() {
   }
 }
 
+function updateNotificationButton() {
+  if (!("Notification" in window)) {
+    notificationsOpen.classList.add("hidden");
+  } else if (Notification.permission === "granted") {
+    notificationsOpen.textContent = "Notifications on";
+    notificationsOpen.disabled = true;
+  } else if (Notification.permission === "denied") {
+    notificationsOpen.textContent = "Notifications blocked";
+    notificationsOpen.disabled = true;
+  }
+}
+
+async function requestNotifications() {
+  if (!("Notification" in window)) return;
+  await Notification.requestPermission();
+  updateNotificationButton();
+}
+
+async function handleAnnouncementEvent(event) {
+  const payload = JSON.parse(event.data || "{}");
+  if (payload.action !== "published") {
+    await loadAnnouncements();
+    return;
+  }
+  const response = await request("/api/announcements");
+  const items = await response.json();
+  const newest = items[0];
+  render(items);
+  if (newest && Notification.permission === "granted" && document.visibilityState !== "visible") {
+    new Notification("New announcement", {
+      body: newest.body.slice(0, 120),
+      tag: `announcement-${newest.id}`,
+    });
+  }
+}
+
 async function refreshAuth() {
   if (!adminPath) {
     composer.classList.add("hidden");
@@ -160,6 +197,8 @@ document.querySelector("#publish-form").onsubmit = async (event) => {
 const events = new EventSource("/events");
 events.onopen = () => { connectionStatus.textContent = "Live updates on"; };
 events.onerror = () => { connectionStatus.textContent = "Reconnecting…"; };
-events.addEventListener("announcement", loadAnnouncements);
+events.addEventListener("announcement", handleAnnouncementEvent);
 events.addEventListener("refetch", loadAnnouncements);
+notificationsOpen.onclick = requestNotifications;
+updateNotificationButton();
 refreshAuth();
