@@ -24,8 +24,11 @@ async def login(payload: LoginRequest, request: Request, response: Response) -> 
     limiter: RateLimiter = request.app.state.login_limiter
     key = request_ip(request)
     if not limiter.allow(key):
-        response.headers["Retry-After"] = str(limiter.retry_after(key))
-        raise HTTPException(status_code=429, detail="Too many requests")
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests",
+            headers={"Retry-After": str(limiter.retry_after(key))},
+        )
     if not verify_password(payload.password, request.app.state.admin_password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     csrf_token = secrets.token_urlsafe(32)
