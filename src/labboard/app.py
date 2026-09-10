@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .config import Settings, get_settings
 from .database import create_engine, create_session_factory, init_database
 from .routes_auth import router as auth_router
+from .routes_announcements import router as announcements_router
 from .schemas import HealthResponse
 from .security import RateLimiter, hash_password
 
@@ -42,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         session_dependency
     )
     application.include_router(auth_router)
+    application.include_router(announcements_router)
 
     @application.middleware("http")
     async def security_headers(request: Request, call_next):
