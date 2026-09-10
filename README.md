@@ -5,35 +5,75 @@ uses FastAPI, SQLAlchemy/SQLite, filesystem attachments, and Server-Sent Events 
 The frontend is deliberately plain and neutral so it is usable as a lab, class, or team
 notice board.
 
-## Quick start
+## Run without Docker
 
 Python 3.14 and [uv](https://docs.astral.sh/uv/) are recommended:
 
 ```bash
 cp .env.example .env
-# Replace ADMIN_PASSWORD with a real value.
+# Edit .env and replace ADMIN_PASSWORD with a strong password.
 uv sync --dev
-uv run uvicorn labboard.app:app --reload
+uv run uvicorn labboard.app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Open <http://127.0.0.1:8000>. The first startup creates the SQLite schema, upload directory,
-and a random JWT signing secret at `./data/.jwt_secret`. The secret is reused across
-restarts and is excluded from version control. `ADMIN_PASSWORD` must be at least 12
-characters; the application fails fast otherwise.
+Open <http://127.0.0.1:8000>. The public announcement page is available at `/`.
+The administrator login page is available at `/admin/login`; after signing in,
+publishing is available at `/admin`.
 
-## Docker deployment
+The first startup creates the SQLite schema, upload directory, and a random JWT signing
+secret at `./data/.jwt_secret`. The secret is reused across restarts and is excluded
+from version control. `ADMIN_PASSWORD` must be at least 12 characters; the application
+fails fast otherwise.
+
+Stop the development server with `Ctrl+C`.
+
+## Run with Docker Compose
 
 The production-shaped deployment serves the static frontend through nginx and proxies
 `/api/` and `/events` to one backend process:
 
 ```bash
-export ADMIN_PASSWORD='use-a-long-password-here'
+cp .env.example .env
+# Edit .env and replace ADMIN_PASSWORD with a strong password.
+docker compose --env-file .env up --build -d
+```
+
+Open <http://127.0.0.1:8080>. The public announcement page is available at `/`.
+The administrator login page is available at `/admin/login`; after signing in,
+publishing is available at `/admin`.
+
+`db-data` and `uploads` are named persistent volumes. Both containers run as non-root
+users and include health checks. Keep `COOKIE_SECURE=true` when TLS is terminated at a
+trusted reverse proxy; local HTTP development uses `false`.
+
+Useful Compose commands:
+
+```bash
+# Show service status
+docker compose --env-file .env ps
+
+# Follow all logs
+docker compose --env-file .env logs -f
+
+# Stop containers and preserve database/uploads
+docker compose --env-file .env down
+
+# Rebuild after code changes
+docker compose --env-file .env up --build -d
+```
+
+Compose automatically reads `.env` from the project directory, so `--env-file .env`
+may be omitted when using that filename:
+
+```bash
 docker compose up --build -d
 ```
 
-Visit <http://127.0.0.1:8080>. `db-data` and `uploads` are named persistent volumes.
-Both containers run as non-root users and include health checks. Keep `COOKIE_SECURE=true`
-when TLS is terminated at a trusted reverse proxy; local HTTP development uses `false`.
+To use a different environment file:
+
+```bash
+docker compose --env-file .env.production up --build -d
+```
 
 The public page does not expose an admin login control. Open
 <http://127.0.0.1:8080/admin/login> to use the separate administrator login page.
@@ -41,6 +81,13 @@ Successful authentication redirects to <http://127.0.0.1:8080/admin>.
 The `Enable notifications` control uses the browser Notification API for live tabs. It
 does not provide notifications after the browser is closed; that requires a separate
 HTTPS Web Push/VAPID service.
+
+## Using the application
+
+Public viewers can read announcements, open links, download attachments, and receive
+live updates while the page is open. To publish, open `/admin/login`, enter the single
+administrator password, and create an announcement with optional links and multiple
+attachments. No account creation or password-reset flow is provided.
 
 ## Security model
 
