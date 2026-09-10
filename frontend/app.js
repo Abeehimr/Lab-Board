@@ -4,6 +4,8 @@ const loginOpen = document.querySelector("#login-open");
 const loginDialog = document.querySelector("#login-dialog");
 const logoutButton = document.querySelector("#logout");
 const connectionStatus = document.querySelector("#connection-status");
+const pageTitle = document.querySelector("#page-title");
+const adminPath = window.location.pathname === "/admin" || window.location.pathname === "/admin/";
 
 function csrfToken() {
   return document.cookie.split("; ").find((item) => item.startsWith("labboard_csrf="))?.split("=")[1] || "";
@@ -93,6 +95,15 @@ async function loadAnnouncements() {
 }
 
 async function refreshAuth() {
+  if (!adminPath) {
+    composer.classList.add("hidden");
+    loginOpen.classList.add("hidden");
+    logoutButton.classList.add("hidden");
+    await loadAnnouncements();
+    return;
+  }
+  pageTitle.textContent = "Admin panel";
+  loginOpen.classList.remove("hidden");
   try {
     await request("/api/auth/status");
     composer.classList.remove("hidden");
@@ -102,6 +113,7 @@ async function refreshAuth() {
     composer.classList.add("hidden");
     loginOpen.classList.remove("hidden");
     logoutButton.classList.add("hidden");
+    if (!loginDialog.open) loginDialog.showModal();
   }
   await loadAnnouncements();
 }

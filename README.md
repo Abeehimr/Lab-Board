@@ -35,6 +35,9 @@ Visit <http://127.0.0.1:8080>. `db-data` and `uploads` are named persistent volu
 Both containers run as non-root users and include health checks. Keep `COOKIE_SECURE=true`
 when TLS is terminated at a trusted reverse proxy; local HTTP development uses `false`.
 
+The public page does not expose an admin login control. Open
+<http://127.0.0.1:8080/admin> directly to sign in and open the admin publishing panel.
+
 ## Security model
 
 * There is exactly one administrator. Its password is seeded from `ADMIN_PASSWORD`;

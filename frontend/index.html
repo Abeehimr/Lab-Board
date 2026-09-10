@@ -8,18 +8,16 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">LabBoard</a>
     <div class="top-actions">
       <span id="connection-status" class="status">Connecting…</span>
-      <button id="login-open" class="button secondary">Admin login</button>
+      <button id="login-open" class="button secondary hidden">Admin login</button>
       <button id="logout" class="button secondary hidden">Log out</button>
     </div>
   </header>
   <main class="layout">
     <section class="intro">
       <p class="eyebrow">Announcements</p>
-      <h1>Stay up to date.</h1>
-      <p class="muted">The latest updates from your lab, class, or team.</p>
+      <h1 id="page-title">Announcements</h1>
     </section>
     <section id="composer" class="card hidden">
       <h2>Publish an announcement</h2>
