@@ -1,16 +1,32 @@
 [project]
-name = "annouce"
+name = "labboard"
 version = "0.1.0"
-description = "Add your description here"
+description = "A secure single-admin announcement board"
 readme = "README.md"
 authors = [
     { name = "Abeehimr", email = "ibraheemkureshi@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "fastapi>=0.116.1",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.10.1",
+    "pyjwt>=2.10.1",
+    "pwdlib[argon2]>=0.2.1",
+    "python-multipart>=0.0.20",
+    "sqlalchemy[asyncio]>=2.0.43",
+    "uvicorn[standard]>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+]
 
 [project.scripts]
-annouce = "annouce:main"
+labboard = "annouce:main"
 
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
