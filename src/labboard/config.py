@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     jwt_secret: str = Field(default="", validation_alias="JWT_SECRET")
     jwt_secret_file: Path = Field(default=Path("./data/.jwt_secret"), validation_alias="JWT_SECRET_FILE")
     admin_password: str = Field(default="", validation_alias="ADMIN_PASSWORD")
+    public_base_url: str = Field(default="http://127.0.0.1:8000", validation_alias="PUBLIC_BASE_URL")
     cookie_secure: bool = Field(default=False, validation_alias="COOKIE_SECURE")
     cookie_name: str = "labboard_session"
     database_url: str = Field(default="sqlite+aiosqlite:///./data/labboard.db", validation_alias="DATABASE_URL")

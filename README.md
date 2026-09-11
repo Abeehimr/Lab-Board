@@ -12,6 +12,7 @@ Python 3.14 and [uv](https://docs.astral.sh/uv/) are recommended:
 ```bash
 cp .env.example .env
 # Edit .env and replace ADMIN_PASSWORD with a strong password.
+# Set PUBLIC_BASE_URL to the URL users use to open the app.
 uv sync --dev
 uv run uvicorn labboard.app:app --host 127.0.0.1 --port 8000 --reload
 ```
@@ -24,6 +25,10 @@ The first startup creates the SQLite schema, upload directory, and a random JWT 
 secret at `./data/.jwt_secret`. The secret is reused across restarts and is excluded
 from version control. `ADMIN_PASSWORD` must be at least 12 characters; the application
 fails fast otherwise.
+
+`PUBLIC_BASE_URL` controls the absolute URLs returned for attachment downloads. For
+Docker on a LAN, set it to the host address and published port, for example
+`http://172.16.11.217:8080`.
 
 Stop the development server with `Ctrl+C`.
 

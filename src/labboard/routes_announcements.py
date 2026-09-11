@@ -18,6 +18,7 @@ router = APIRouter(prefix="/api", tags=["announcements"])
 
 
 def serialize_announcement(item: Announcement, request: Request) -> AnnouncementRead:
+    base_url = request.app.state.settings.public_base_url.rstrip("/")
     return AnnouncementRead(
         id=item.id,
         body=item.body,
@@ -28,7 +29,7 @@ def serialize_announcement(item: Announcement, request: Request) -> Announcement
                 original_name=attachment.original_name,
                 content_type=attachment.content_type,
                 size=attachment.size,
-                url=str(request.url_for("download_attachment", attachment_id=attachment.id)),
+                url=f"{base_url}{request.url_for('download_attachment', attachment_id=attachment.id).path}",
             )
             for attachment in item.attachments
         ],

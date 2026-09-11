@@ -10,6 +10,7 @@ async def test_publish_list_download_delete(tmp_path):
     settings = Settings(
         jwt_secret="c" * 32,
         admin_password="correct-horse-battery",
+        public_base_url="http://172.16.11.217:8080",
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'db.sqlite3'}",
         upload_dir=tmp_path / "uploads",
     )
@@ -38,6 +39,7 @@ async def test_publish_list_download_delete(tmp_path):
             assert response.status_code == 201
             announcement = response.json()
             assert [item["original_name"] for item in announcement["attachments"]] == ["notes.txt", "more.txt"]
+            assert announcement["attachments"][0]["url"].startswith("http://172.16.11.217:8080/api/attachments/")
             listing = await client.get("/api/announcements")
             assert listing.status_code == 200
             download = await client.get(announcement["attachments"][0]["url"])
