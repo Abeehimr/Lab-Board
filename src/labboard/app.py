@@ -31,7 +31,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
         await engine.dispose()
 
-    application = FastAPI(title=settings.app_name, lifespan=lifespan)
+    application = FastAPI(
+        title=settings.app_name,
+        lifespan=lifespan,
+        openapi_url=None,
+        docs_url=None,
+        redoc_url=None,
+    )
 
     async def session_dependency() -> AsyncSession:
         async with session_factory() as session:
