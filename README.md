@@ -48,8 +48,10 @@ The administrator login page is available at `/admin/login`; after signing in,
 publishing is available at `/admin`.
 
 `db-data` and `uploads` are named persistent volumes. Both containers run as non-root
-users and include health checks. Keep `COOKIE_SECURE=true` when TLS is terminated at a
-trusted reverse proxy; local HTTP development uses `false`.
+users. Compose keeps one lightweight backend readiness check, running once per minute
+for startup ordering; duplicate image and frontend probes are intentionally disabled.
+Keep `COOKIE_SECURE=true` when TLS is terminated at a trusted reverse proxy; local HTTP
+development uses `false`.
 
 Useful Compose commands:
 
