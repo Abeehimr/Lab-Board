@@ -6,9 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 COPY pyproject.toml README.md ./
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -c "import tomllib, subprocess, sys; deps = tomllib.load(open('pyproject.toml', 'rb'))['project']['dependencies']; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-cache-dir', *deps])"
 COPY src ./src
 COPY frontend ./frontend
-RUN pip install --no-cache-dir .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir --no-deps .
 
 RUN useradd --create-home --uid 10001 labboard \
     && mkdir -p /app/data /app/uploads \
