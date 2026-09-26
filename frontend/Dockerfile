@@ -7,4 +7,4 @@ RUN sed -i 's/user nginx;/user nginx;/' /etc/nginx/nginx.conf \
     && touch /var/run/nginx.pid \
     && chown nginx:nginx /var/run/nginx.pid
 USER nginx
-EXPOSE 8080
+EXPOSE 80
